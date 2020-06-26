@@ -26,6 +26,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.embulk.config.ConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,7 @@ public class ForceClient {
 
     private static final String SERVICE_PATH = "/services/data/";
     private static final String PATH_WAVE_QUERY = "/wave/query";
+    private static final String PATH_WAVE_DATASETS = "/wave/datasets/";
     private static final String STR_UTF_8 = "UTF-8";
     private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     private static final String SYS_PROPERTY_SOCKET_TIMEOUT = "com.springml.socket.timeout";
@@ -42,7 +44,6 @@ public class ForceClient {
     private static final String HEADER_AUTH = "Authorization";
     private static final String HEADER_OAUTH = "OAuth ";
     private static final String STR_QUERY = "query";
-    private static final String PATH_WAVE_DATASETS = "/wave/datasets/";
     private static final String HEADER_ACCEPT = "Accept";
 
     private PluginTask pluginTask;
@@ -53,29 +54,25 @@ public class ForceClient {
         this.pluginTask = pluginTask;
     }
 
-    public InputStream query(String datasetId) throws UnsupportedOperationException, IOException, URISyntaxException {
+    public InputStream query(Dataset dataset) throws UnsupportedOperationException, IOException, URISyntaxException {
         String waveQueryPath = getWaveQueryPath(pluginTask);
         URI queryURI = getRequestURI(partnerConnection, waveQueryPath, null);
         ObjectMapper objectMapper = createObjectMapper();
-        String request = createRequest(objectMapper, datasetId);
+        String datasetId = dataset.getId() + "/" + dataset.getCurrentVersionId();
+        String request = createRequest(objectMapper, datasetId, dataset.getName());
         return post(queryURI, getSessionId(), request);
     }
 
-    public String getDatasetId() throws URISyntaxException, UnsupportedOperationException, IOException
+    public Dataset getDataset() throws URISyntaxException, UnsupportedOperationException, IOException
     {
-        String datasetId = null;
-
         String datasetsQueryPath = getDatasetsQueryPath();
         URI queryURI = getRequestURI(partnerConnection, datasetsQueryPath, null);
 
         String response = get(queryURI, getSessionId());
         ObjectMapper objectMapper = createObjectMapper();
         Dataset dataset = objectMapper.readValue(response.getBytes(), Dataset.class);
-        logger.info(String.format("[datasetResponse]%s", dataset.toString()));
-        datasetId = dataset.getId() + "/" + dataset.getCurrentVersionId();
-
-        logger.info(String.format("[dataset]%s", datasetId));
-        return datasetId;
+        logger.info(String.format("[dataset] %s", dataset.getName()));
+        return dataset;
     }
 
     private ObjectMapper createObjectMapper()
@@ -87,14 +84,21 @@ public class ForceClient {
         return objectMapper;
     }
 
-    private String createRequest(ObjectMapper objectMapper, String datasetId) throws JsonProcessingException
+    private String createRequest(ObjectMapper objectMapper, String datasetId, String name) throws JsonProcessingException
     {
-        Map<String, String> saqlMap = new HashMap<String, String>(4);
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(String.format("q = load \"%s\";", datasetId));
-        stringBuilder.append(pluginTask.getSaql());
-        logger.info(String.format("[SAQL]%s", stringBuilder.toString()));
-        saqlMap.put(STR_QUERY, stringBuilder.toString());
+        String loadStatement = String.format("q = load \"%s\";", name);
+        String saql = pluginTask.getSaql();
+        if(!saql.contains(loadStatement)){
+            throw new ConfigException("dataset name do not match");
+        }
+
+        String loadDatasetIdStatement = String.format("q = load \"%s\";", datasetId);
+
+        saql = saql.replace(loadStatement, loadDatasetIdStatement);
+        logger.info(String.format("[SAQL] %s", saql));
+
+        Map<String, String> saqlMap = new HashMap<String, String>();
+        saqlMap.put(STR_QUERY, saql);
         return objectMapper.writeValueAsString(saqlMap);
     }
 
@@ -138,8 +142,7 @@ public class ForceClient {
         httpPost.setConfig(getRequestConfig());
 
         httpPost.addHeader(HEADER_AUTH, HEADER_OAUTH + sessionId);
-
-        return execute(uri, httpPost);
+        return execute(httpPost);
     }
 
     public String get(URI uri, String sessionId) throws UnsupportedOperationException, IOException
@@ -149,7 +152,7 @@ public class ForceClient {
         httpGet.addHeader(HEADER_AUTH, HEADER_OAUTH + sessionId);
         httpGet.addHeader(HEADER_ACCEPT, CONTENT_TYPE_APPLICATION_JSON);
 
-        InputStream is = execute(uri, httpGet);
+        InputStream is = execute(httpGet);
         String response = IOUtils.toString(is, STR_UTF_8);
         logger.info(response);
         return response;
@@ -163,21 +166,21 @@ public class ForceClient {
         return requestConfig;
     }
 
-    private InputStream execute(URI uri, HttpUriRequest httpReq) throws UnsupportedOperationException, IOException
+    private InputStream execute(HttpUriRequest httpReq) throws UnsupportedOperationException, IOException
     {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        logger.info(String.format("[request] %s", httpReq.getURI().getPath()));
 
+        CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse response = httpClient.execute(httpReq);
 
         int statusCode = response.getStatusLine().getStatusCode();
         if (!(statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED)) {
-            // String reasonPhrase = response.getStatusLine().getReasonPhrase();
-            // String errResponse = IOUtils.toString(response.getEntity().getContent(), STR_UTF_8);
-            // TODO エラーハンドリング
+            String reasonPhrase = response.getStatusLine().getReasonPhrase();
+            String errResponse = IOUtils.toString(response.getEntity().getContent(), STR_UTF_8);
+            throw new ConfigException(String.format("%s:%s", reasonPhrase,errResponse));
         }
 
         HttpEntity responseEntity = response.getEntity();
-
         return responseEntity.getContent();
     }
 
