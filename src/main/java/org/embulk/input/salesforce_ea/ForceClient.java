@@ -40,7 +40,6 @@ public class ForceClient {
     private static final String STR_UTF_8 = "UTF-8";
     private static final String CONTENT_TYPE_APPLICATION_JSON = "application/json";
     private static final String SYS_PROPERTY_SOCKET_TIMEOUT = "com.springml.socket.timeout";
-    private static final String DEFAULT_CONNECTION_TIMEOUT = "600000";
     private static final String HEADER_AUTH = "Authorization";
     private static final String HEADER_OAUTH = "OAuth ";
     private static final String STR_QUERY = "query";
@@ -50,12 +49,12 @@ public class ForceClient {
     private PartnerConnection partnerConnection;
 
     public ForceClient(PluginTask pluginTask) throws AsyncApiException, ConnectionException, URISyntaxException {
-        this.partnerConnection = createConnectorConfig(pluginTask);
         this.pluginTask = pluginTask;
+        this.partnerConnection = createConnectorConfig();
     }
 
     public InputStream query(Dataset dataset) throws UnsupportedOperationException, IOException, URISyntaxException {
-        String waveQueryPath = getWaveQueryPath(pluginTask);
+        String waveQueryPath = getWaveQueryPath();
         URI queryURI = getRequestURI(partnerConnection, waveQueryPath, null);
         ObjectMapper objectMapper = createObjectMapper();
         String datasetId = dataset.getId() + "/" + dataset.getCurrentVersionId();
@@ -107,7 +106,7 @@ public class ForceClient {
         return partnerConnection.getConfig().getSessionId();
     }
 
-    private PartnerConnection createConnectorConfig(PluginTask pluginTask) throws ConnectionException
+    private PartnerConnection createConnectorConfig() throws ConnectionException
     {
         ConnectorConfig partnerConfig = new ConnectorConfig();
         partnerConfig.setUsername(pluginTask.getUsername());
@@ -116,7 +115,7 @@ public class ForceClient {
         return new PartnerConnection(partnerConfig);
     }
 
-    private String getWaveQueryPath(PluginTask pluginTask)
+    private String getWaveQueryPath()
     {
         StringBuilder waveQueryPath = new StringBuilder();
         waveQueryPath.append(SERVICE_PATH);
@@ -160,7 +159,7 @@ public class ForceClient {
 
     private RequestConfig getRequestConfig()
     {
-        int timeout = Integer.parseInt(System.getProperty(SYS_PROPERTY_SOCKET_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT));
+        int timeout = Integer.parseInt(System.getProperty(SYS_PROPERTY_SOCKET_TIMEOUT, pluginTask.getConnectionTimeout()));
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(timeout).setConnectTimeout(timeout)
             .setConnectionRequestTimeout(timeout).build();
         return requestConfig;

@@ -19,6 +19,10 @@ public interface PluginTask extends Task
   @ConfigDefault("\"46.0\"")
   String getApiVersion();
 
+  @Config("connection_timeout")
+  @ConfigDefault("\"600000\"")
+  String getConnectionTimeout();
+
   @Config("security_token")
   String getSecurityToken();
 
