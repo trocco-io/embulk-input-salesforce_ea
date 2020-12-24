@@ -42,13 +42,11 @@ public class SalesforceEaFileInputPlugin implements FileInputPlugin {
     @Override
     public TransactionalFileInput open(TaskSource taskSource, int taskIndex)
     {
-        InputStream inputStream = null;
         try {
             final PluginTask task = taskSource.loadTask(PluginTask.class);
             ForceClient forceClient = new ForceClient(task);
             Dataset dataset = forceClient.getDataset();
-            inputStream = forceClient.query(dataset);
-            return new SalesforceEaFileInput(task, inputStream);
+            return new SalesforceEaFileInput(forceClient, task, dataset);
         }
         catch (AsyncApiException | ConnectionException | URISyntaxException | UnsupportedOperationException | IOException e) {
             logger.error(e.getMessage(), e);

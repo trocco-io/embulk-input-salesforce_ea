@@ -53,12 +53,13 @@ public class ForceClient {
         this.partnerConnection = createConnectorConfig();
     }
 
-    public InputStream query(Dataset dataset) throws UnsupportedOperationException, IOException, URISyntaxException {
+    public InputStream query(Dataset dataset, int offset, String limit) throws UnsupportedOperationException, IOException, URISyntaxException {
         String waveQueryPath = getWaveQueryPath();
         URI queryURI = getRequestURI(partnerConnection, waveQueryPath, null);
         ObjectMapper objectMapper = createObjectMapper();
         String datasetId = dataset.getId() + "/" + dataset.getCurrentVersionId();
-        String request = createRequest(objectMapper, datasetId, dataset.getName());
+        String saql = createSaqlWithOffset(datasetId, dataset.getName(), Integer.toString(offset), limit);
+        String request = createRequest(objectMapper, saql);
         return post(queryURI, getSessionId(), request);
     }
 
@@ -83,22 +84,34 @@ public class ForceClient {
         return objectMapper;
     }
 
-    private String createRequest(ObjectMapper objectMapper, String datasetId, String name) throws JsonProcessingException
+    private String createRequest(ObjectMapper objectMapper, String saql) throws JsonProcessingException
     {
+        Map<String, String> saqlMap = new HashMap<String, String>();
+        saqlMap.put(STR_QUERY, saql);
+        return objectMapper.writeValueAsString(saqlMap);
+    }
+
+    private String createSaqlWithOffset(String datasetId, String name, String offset, String limit) {
         String loadStatement = String.format("q = load \"%s\";", name);
-        String saql = pluginTask.getSaql();
-        if(!saql.contains(loadStatement)){
+
+        String saqlLoad = pluginTask.getSaql();
+        if(!saqlLoad.contains(loadStatement)){
             throw new ConfigException("dataset name do not match");
         }
 
         String loadDatasetIdStatement = String.format("q = load \"%s\";", datasetId);
 
-        saql = saql.replace(loadStatement, loadDatasetIdStatement);
-        logger.info(String.format("[SAQL] %s", saql));
+        saqlLoad = saqlLoad.replace(loadStatement, loadDatasetIdStatement);
 
-        Map<String, String> saqlMap = new HashMap<String, String>();
-        saqlMap.put(STR_QUERY, saql);
-        return objectMapper.writeValueAsString(saqlMap);
+        StringBuilder saqlBuilder = new StringBuilder();
+        saqlBuilder.append(saqlLoad);
+        saqlBuilder.append(System.lineSeparator());
+        saqlBuilder.append(String.format("q = offset q %s;", offset));
+        saqlBuilder.append(System.lineSeparator());
+        saqlBuilder.append(String.format("q = limit q %s;", limit));
+
+        logger.info(String.format("[SAQL] %s", saqlBuilder.toString()));
+        return saqlBuilder.toString();
     }
 
     private String getSessionId()

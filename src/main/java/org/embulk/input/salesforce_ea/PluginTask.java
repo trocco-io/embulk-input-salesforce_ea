@@ -40,6 +40,14 @@ public interface PluginTask extends Task
   @ConfigDefault("[]")
   SchemaConfig getColumns();
 
+  @Config("pages")
+  @ConfigDefault("1")
+  String getPages();
+
+  @Config("step")
+  @ConfigDefault("10000")
+  String getStep();
+
   @ConfigInject
   BufferAllocator getBufferAllocator();
 
