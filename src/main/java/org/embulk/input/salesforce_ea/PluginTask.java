@@ -1,11 +1,8 @@
 package org.embulk.input.salesforce_ea;
 
-import org.embulk.config.Config;
-import org.embulk.config.ConfigDefault;
-import org.embulk.config.ConfigInject;
-import org.embulk.config.Task;
-import org.embulk.spi.BufferAllocator;
-import org.embulk.spi.SchemaConfig;
+import org.embulk.util.config.Config;
+import org.embulk.util.config.ConfigDefault;
+import org.embulk.util.config.Task;
 
 public interface PluginTask extends Task
 {
@@ -36,10 +33,6 @@ public interface PluginTask extends Task
   @Config("saql")
   String getSaql();
 
-  @Config("columns")
-  @ConfigDefault("[]")
-  SchemaConfig getColumns();
-
   @Config("pages")
   @ConfigDefault("1")
   String getPages();
@@ -47,8 +40,5 @@ public interface PluginTask extends Task
   @Config("step")
   @ConfigDefault("10000")
   String getStep();
-
-  @ConfigInject
-  BufferAllocator getBufferAllocator();
 
 }
