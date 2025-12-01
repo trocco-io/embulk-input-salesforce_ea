@@ -7,8 +7,7 @@ import java.util.Iterator;
 import java.util.stream.IntStream;
 
 import org.embulk.config.ConfigException;
-import org.embulk.spi.util.InputStreamFileInput;
-import org.embulk.spi.util.InputStreamFileInput.InputStreamWithHints;
+import org.embulk.util.file.InputStreamFileInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
