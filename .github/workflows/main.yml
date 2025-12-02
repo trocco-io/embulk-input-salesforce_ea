@@ -31,6 +31,8 @@ jobs:
         with:
           java-version: 8
           distribution: "zulu"
+      - name: lint
+        run: ./gradlew spotlessCheck
       - run: ./gradlew test
 
   build:

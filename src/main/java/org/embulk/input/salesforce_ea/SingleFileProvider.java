@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.stream.IntStream;
-
 import org.embulk.config.ConfigException;
 import org.embulk.util.file.InputStreamFileInput;
 import org.slf4j.Logger;
@@ -27,7 +26,8 @@ public class SingleFileProvider implements InputStreamFileInput.Provider {
     this.dataset = dataset;
 
     logger.info(String.format("page size: %s", pluginTask.getPages()));
-    this.iterator = IntStream.range(FITST_STEP_NUM, Integer.valueOf(pluginTask.getPages())).boxed().iterator();
+    this.iterator =
+        IntStream.range(FITST_STEP_NUM, Integer.valueOf(pluginTask.getPages())).boxed().iterator();
   }
 
   @Override
@@ -46,6 +46,5 @@ public class SingleFileProvider implements InputStreamFileInput.Provider {
   }
 
   @Override
-  public void close() throws IOException {
-  }
+  public void close() throws IOException {}
 }

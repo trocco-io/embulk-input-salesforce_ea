@@ -2,8 +2,8 @@ plugins {
     id "java"
     id "maven-publish"
     id "org.embulk.embulk-plugins" version "0.7.0"
-    id "checkstyle"
     id "com.palantir.git-version" version "0.12.3"
+    id "com.diffplug.spotless" version "6.13.0"
 }
 
 repositories {
@@ -69,23 +69,19 @@ gem {
     licenses = ["MIT"]
 }
 
-checkstyle {
-    configFile = file("${project.rootDir}/config/checkstyle/checkstyle.xml")
-    toolVersion = '6.14.1'
-}
-checkstyleMain {
-    configFile = file("${project.rootDir}/config/checkstyle/default.xml")
-    ignoreFailures = true
-}
-checkstyleTest {
-    configFile = file("${project.rootDir}/config/checkstyle/default.xml")
-    ignoreFailures = true
-}
-
 tasks.withType(JavaCompile) {
     options.compilerArgs << "-Xlint:deprecation"
 }
 
 dependencyLocking {
     lockAllConfigurations()
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }

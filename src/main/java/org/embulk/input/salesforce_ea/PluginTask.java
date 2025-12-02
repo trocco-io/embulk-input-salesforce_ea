@@ -4,8 +4,7 @@ import org.embulk.util.config.Config;
 import org.embulk.util.config.ConfigDefault;
 import org.embulk.util.config.Task;
 
-public interface PluginTask extends Task
-{
+public interface PluginTask extends Task {
   @Config("username")
   String getUsername();
 
@@ -40,5 +39,4 @@ public interface PluginTask extends Task
   @Config("step")
   @ConfigDefault("10000")
   String getStep();
-
 }
