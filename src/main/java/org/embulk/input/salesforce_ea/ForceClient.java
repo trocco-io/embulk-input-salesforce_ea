@@ -120,9 +120,30 @@ public class ForceClient {
 
   private PartnerConnection createConnectorConfig() throws ConnectionException {
     ConnectorConfig partnerConfig = new ConnectorConfig();
-    partnerConfig.setUsername(pluginTask.getUsername());
-    partnerConfig.setPassword(pluginTask.getPassword() + pluginTask.getSecurityToken());
-    partnerConfig.setAuthEndpoint(pluginTask.getAuthEndPoint() + pluginTask.getApiVersion());
+    if (pluginTask.getAuthMethod() == AuthMethod.user_password) {
+      if (pluginTask.getUsername().isPresent()
+          && pluginTask.getPassword().isPresent()
+          && pluginTask.getSecurityToken().isPresent()
+          && pluginTask.getAuthEndPoint().isPresent()) {
+        partnerConfig.setUsername(pluginTask.getUsername().get());
+        partnerConfig.setPassword(
+            pluginTask.getPassword().get() + pluginTask.getSecurityToken().get());
+        partnerConfig.setAuthEndpoint(
+            pluginTask.getAuthEndPoint().get() + pluginTask.getApiVersion());
+      } else {
+        throw new ConnectionException(
+            "user_name, password, security_token, and auth_end_point are required.");
+      }
+    }
+    if (pluginTask.getAuthMethod() == AuthMethod.oauth) {
+      if (pluginTask.getAccessToken().isPresent() && pluginTask.getInstanceUrl().isPresent()) {
+        partnerConfig.setSessionId(pluginTask.getAccessToken().get());
+        partnerConfig.setServiceEndpoint(
+            pluginTask.getInstanceUrl().get() + "/services/Soap/u/" + pluginTask.getApiVersion());
+      } else {
+        throw new ConnectionException("auth_method and instance_url are required.");
+      }
+    }
     return new PartnerConnection(partnerConfig);
   }
 
