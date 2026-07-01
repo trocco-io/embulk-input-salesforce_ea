@@ -1,15 +1,18 @@
 package org.embulk.input.salesforce_ea;
 
+import java.util.Optional;
 import org.embulk.util.config.Config;
 import org.embulk.util.config.ConfigDefault;
 import org.embulk.util.config.Task;
 
 public interface PluginTask extends Task {
   @Config("username")
-  String getUsername();
+  @ConfigDefault("null")
+  Optional<String> getUsername();
 
   @Config("password")
-  String getPassword();
+  @ConfigDefault("null")
+  Optional<String> getPassword();
 
   @Config("api_version")
   @ConfigDefault("\"46.0\"")
@@ -20,11 +23,12 @@ public interface PluginTask extends Task {
   String getConnectionTimeout();
 
   @Config("security_token")
-  String getSecurityToken();
+  @ConfigDefault("null")
+  Optional<String> getSecurityToken();
 
   @Config("auth_end_point")
   @ConfigDefault("\"https://login.salesforce.com/services/Soap/u/\"")
-  String getAuthEndPoint();
+  Optional<String> getAuthEndPoint();
 
   @Config("dataset_id")
   String getDatasetId();
@@ -39,4 +43,16 @@ public interface PluginTask extends Task {
   @Config("step")
   @ConfigDefault("10000")
   String getStep();
+
+  @Config("auth_method")
+  @ConfigDefault("\"user_password\"")
+  AuthMethod getAuthMethod();
+
+  @Config("instance_url")
+  @ConfigDefault("null")
+  Optional<String> getInstanceUrl();
+
+  @Config("access_token")
+  @ConfigDefault("null")
+  Optional<String> getAccessToken();
 }
