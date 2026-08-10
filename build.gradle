@@ -35,10 +35,18 @@ dependencies {
     implementation "org.embulk:embulk-util-timestamp:0.2.2"
     implementation "org.embulk:embulk-util-file:0.1.5"
 
+    // force-wsc/force-partner-api declare Jackson in their pom but their classes never
+    // reference it (verified against the 68.0.0 jars). Exclude it: their jackson-bom
+    // otherwise bumps jackson-datatype-jdk8, which breaks on Embulk 0.9 where
+    // jackson-databind 2.6.7 is loaded parent-first from embulk-core.
     // https://mvnrepository.com/artifact/com.force.api/force-wsc
-    implementation group: 'com.force.api', name: 'force-wsc', version: '68.0.0'
+    implementation(group: 'com.force.api', name: 'force-wsc', version: '68.0.0') {
+        exclude group: 'com.fasterxml.jackson.core'
+    }
     // https://mvnrepository.com/artifact/com.force.api/force-partner-api
-    implementation group: 'com.force.api', name: 'force-partner-api', version: '68.0.0'
+    implementation(group: 'com.force.api', name: 'force-partner-api', version: '68.0.0') {
+        exclude group: 'com.fasterxml.jackson.core'
+    }
     // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'
     // https://mvnrepository.com/artifact/commons-io/commons-io

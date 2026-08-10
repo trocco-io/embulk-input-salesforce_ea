@@ -1,11 +1,10 @@
 # This is a Gradle generated file for dependency locking.
 # Manual edits can break the build and are not advised.
 # This file is expected to be part of source control.
-com.fasterxml.jackson.core:jackson-annotations:2.18.8
-com.fasterxml.jackson.core:jackson-core:2.18.8
-com.fasterxml.jackson.core:jackson-databind:2.18.8
-com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.18.8
-com.fasterxml.jackson:jackson-bom:2.18.8
+com.fasterxml.jackson.core:jackson-annotations:2.11.0
+com.fasterxml.jackson.core:jackson-core:2.11.0
+com.fasterxml.jackson.core:jackson-databind:2.11.0
+com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.6.7
 com.force.api:force-partner-api:68.0.0
 com.force.api:force-wsc:68.0.0
 commons-beanutils:commons-beanutils:1.11.0
