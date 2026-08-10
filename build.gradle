@@ -36,9 +36,9 @@ dependencies {
     implementation "org.embulk:embulk-util-file:0.1.5"
 
     // https://mvnrepository.com/artifact/com.force.api/force-wsc
-    implementation group: 'com.force.api', name: 'force-wsc', version: '58.0.0'
+    implementation group: 'com.force.api', name: 'force-wsc', version: '68.0.0'
     // https://mvnrepository.com/artifact/com.force.api/force-partner-api
-    implementation group: 'com.force.api', name: 'force-partner-api', version: '58.0.0'
+    implementation group: 'com.force.api', name: 'force-partner-api', version: '68.0.0'
     // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.12'
     // https://mvnrepository.com/artifact/commons-io/commons-io
