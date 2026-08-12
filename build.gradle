@@ -35,10 +35,11 @@ dependencies {
     implementation "org.embulk:embulk-util-timestamp:0.2.2"
     implementation "org.embulk:embulk-util-file:0.1.5"
 
-    // force-wsc/force-partner-api declare Jackson in their pom but their classes never
-    // reference it (verified against the 68.0.0 jars). Exclude it: their jackson-bom
-    // otherwise bumps jackson-datatype-jdk8, which breaks on Embulk 0.9 where
-    // jackson-databind 2.6.7 is loaded parent-first from embulk-core.
+    // force-wsc/force-partner-api declare Jackson in their pom, but it is only referenced
+    // by the Bulk API classes (com.sforce.async.BulkConnection/JobInfo/Error), which this
+    // plugin does not use. Exclude it so the lock keeps the proven Jackson set: their pom
+    // otherwise bumps jackson artifacts, which breaks on Embulk 0.9 where jackson-databind
+    // 2.6.7 is loaded parent-first from embulk-core.
     // https://mvnrepository.com/artifact/com.force.api/force-wsc
     implementation(group: 'com.force.api', name: 'force-wsc', version: '68.0.0') {
         exclude group: 'com.fasterxml.jackson.core'
