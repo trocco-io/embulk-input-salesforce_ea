@@ -15,7 +15,7 @@ public interface PluginTask extends Task {
   Optional<String> getPassword();
 
   @Config("api_version")
-  @ConfigDefault("\"46.0\"")
+  @ConfigDefault("\"64.0\"")
   String getApiVersion();
 
   @Config("connection_timeout")
