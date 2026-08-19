@@ -26,7 +26,7 @@ TODO: Write short description here and build.gradle file.
 
 ### API Settings
 
-- **api_version**: Salesforce API version (string, default: `"46.0"`)
+- **api_version**: Salesforce API version (string, default: `"64.0"`)
 - **connection_timeout**: Connection timeout in milliseconds (string, default: `"600000"`)
 
 ### Data Query
